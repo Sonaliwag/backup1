@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+    
+parameters {
+string(name: 'mystring1', defaultValue: 'stagingValue', description: 'this is for test')
+booleanParam(name: 'myvalue', defaultValue: true, description: 'please select the value')
+choice(name: 'MYCHOICES', choices: ['SIT', 'UAT', 'PreProd'], description: 'Please select the Env')
+    
+}  
+
+
+    stages {
+        stage('git checkout') {
+            
+            environment {
+        key1 = "val2"
+            }
+            steps {
+                sh '''
+                pwd
+                cal
+                date
+                ls
+            
+                '''
+              sh 'echo "${key1}"'   
+            }
+        }
+        stage('Build Code') {
+            steps {
+                echo 'Building the code'
+                sh 'ls'
+                sh 'echo the selected ENV is "${MYCHOICES}"'
+                
+                
+            }
+        }
+        stage('Deploy to Test') {
+            steps {
+                echo 'Deploying in the test Env'
+                echo 'this is a test job'
+                sh 'echo the string value is "${mystring1}"'
+                sh 'echo the boolean value is "${myvalue}"'
+            }
+        }
+        
+        stage('Pushing') {
+            
+            input {
+            message 'Please confirm to deploy in Prod'
+            ok "we can deploy in Prod"
+                }
+
+
+           
+            steps {
+                echo 'Pushing the Artifacts on Nexus'
+                 sh 'echo "${BUILD_NUMBER}"'
+            }
+        }
+        stage('Deploy to Prod') {
+            steps {
+                echo 'Pushing the Artifacts on Nexus'
+                 sh 'echo "${BUILD_NUMBER}"'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'I will always say Hello again!'
+        }
+        
+        failure {
+            echo 'This is executed bcos of failure '
+        }
+        success {
+            echo 'This is executed bcos of your job pass '
+        }
+    }
+    }
